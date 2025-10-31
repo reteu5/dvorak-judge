@@ -1,0 +1,11 @@
+{
+  "id": "print-hello",
+  "title": "Hello 출력",
+  "time_limit_ms": 2000,
+  "memory_limit_mb": 256,
+  "io": "stdout-only",
+  "checker": "strict",
+  "testcases": [
+    { "input": "", "output": "Hello, Dvorak!\n" }
+  ]
+}
