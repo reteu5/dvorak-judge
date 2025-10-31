@@ -1,0 +1,47 @@
+services:
+  api:
+    image: python:3.12-slim
+    container_name: dvorak_api
+    command: bash -lc "pip install -q fastapi uvicorn[standard] redis fastapi[all] && uvicorn app:app --host 0.0.0.0 --port 8000"
+    working_dir: /app
+    volumes:
+      - ./src/server:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - ALLOW_ORIGIN=http://localhost:3000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+
+  worker:
+    image: python:3.12-slim
+    container_name: dvorak_worker
+    command: bash -lc "apt-get update && apt-get install -y docker-cli && pip install -q redis && python worker.py"
+    working_dir: /app
+    volumes:
+      - ./src/server:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: dvorak_redis
+    ports:
+      - "6379:6379"
+
+  cpp_runtime:
+    build:
+      context: ./src/runtimes/cpp
+      dockerfile: Dockerfile
+    image: dvorak-cpp:latest
+
+  py_runtime:
+    build:
+      context: ./src/runtimes/python
+      dockerfile: Dockerfile
+    image: dvorak-py:latest
